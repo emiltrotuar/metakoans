@@ -1,37 +1,13 @@
-def attribute arg
+def attribute arg, &block
 	if arg.is_a?(Hash)
-		k = arg.keys[0]
-		v = arg.values[0]
-	  class_eval <<-AREADER
-	  	def #{k}
-	  	 @#{k}||=#{v}
-	  	end
-	  AREADER
-	  class_eval <<-AWRITER
-		  def #{k}=(v)
-		   @#{k}=v
-		  end
-	  AWRITER
-    class_eval <<-ACHECKER
-	    def #{k}?
-	     @#{k} ? true : false
-	    end
-    ACHECKER
-	else
-		class_eval <<-AREADER
-	  	def #{arg}
-	  	 @#{arg}
-	  	end
-	  AREADER
-	  class_eval <<-AWRITER
-		  def #{arg}=(v)
-		   @#{arg}=v
-		  end
-	  AWRITER
-    class_eval <<-ACHECKER
-	    def #{arg}?
-	     @#{arg} ? true : false
-	    end
-    ACHECKER
+		k,v = arg.keys[0],arg.values[0]
+  else
+  	k,v = arg,0
+  	define_method v=:v, &block if block_given?
   end
+  class_eval <<-DEF
+  	def #{k}; @#{k}||=#{v}; end
+	  def #{k}=(v); @#{k}=v; end
+    def #{k}?; @#{k}; end
+  DEF
 end
